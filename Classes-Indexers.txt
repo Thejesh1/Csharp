@@ -1,0 +1,48 @@
+Program.cs
+----------
+using System;
+using HelloWorld.Math;
+namespace HelloWorld
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var cookie = new HttpCookie();
+            cookie["name"] = "Thejesh";
+            Console.WriteLine(cookie["name"]);
+        }
+    }
+}
+
+
+HttpCookie.cs
+---------------
+using System;
+using System.Collections.Generic;
+
+namespace HelloWorld
+{
+    public class HttpCookie
+    {
+        private readonly Dictionary<string, string> _dictionary;
+        public DateTime Expiry { get; set; } //prop auto implementation
+        public HttpCookie()
+        {
+            _dictionary = new Dictionary<string, string>();
+        }
+       /* public void SetItem(string key,string value)
+        {
+
+        }
+        public void GetItem(string key)
+        {
+
+        }*/
+        public string this[string key]
+        {
+            get { return _dictionary[key]; }
+            set { _dictionary[key] = value; }
+        }
+    }
+}

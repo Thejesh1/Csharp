@@ -1,0 +1,114 @@
+
+Program.cs
+----------
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Extensibility
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var dbMigrator = new DbMigrator(new FileLogger("F:\\log.txt"));
+            dbMigrator.Migrate();
+        }
+    }
+}
+
+
+ILogger.cs
+----------
+namespace Extensibility
+{
+    public interface ILogger
+    {
+        void LogError(string message);
+        void LogInfo(string message);
+
+    }
+}
+
+DbMigrator.cs
+--------------
+using System;
+
+namespace Extensibility
+{
+    public class DbMigrator 
+    {
+        private readonly ILogger logger;
+
+        public DbMigrator(ILogger logger)
+        {
+            this.logger = logger;
+        }
+        public void Migrate()
+        {
+            logger.LogInfo("Migrating started at {0} "+ DateTime.Now);
+
+            // Details of migrating a database
+            logger.LogInfo("Migrating finished at {0} " + DateTime.Now);
+
+        }
+    }
+}
+
+Consolelogger.cs
+------------------
+using System;
+
+namespace Extensibility
+{
+    public class Consolelogger : ILogger
+    {
+        public void LogError(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(message);
+        }
+
+        public void LogInfo(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(message);
+
+        }
+    }
+}
+
+FileLogger.cs
+--------------
+using System.IO;
+
+namespace Extensibility
+{
+    public class FileLogger : ILogger
+    {
+        private readonly string path;
+
+        public FileLogger(string path)
+        {
+            this.path = path;
+        }
+        public void LogError(string message)
+        {
+            Log(message, "ERROR");           
+
+        }
+
+        public void LogInfo(string message)
+        {
+            Log(message, "INFO");
+        }
+        private void Log(string message,string messageType)
+        {
+            using (var streamWriter = new StreamWriter(path, true)) // dispose file if exception occurs
+            {
+                streamWriter.WriteLine(messageType+" : " + message);
+            }
+        }
+    }
+}

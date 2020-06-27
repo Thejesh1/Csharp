@@ -1,0 +1,147 @@
+
+Program.cs
+-----------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Testability
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var orderProcessor = new OrderProcessor(new ShippingCalculator());
+            var order = new Order{DatePlaced = DateTime.Now, TotalPrice = 100f};
+            orderProcessor.Process(order);
+        }
+    }
+}
+
+Order.cs
+----------
+using System;
+
+namespace Testability
+{
+    public class Order
+    {
+        public int Id { get; set; }
+        public DateTime  DatePlaced { get; set; }
+        public Shipment Shipment { get; set; }
+        public float TotalPrice { get; set; }
+        
+        public bool isShipped
+        {
+            get { return Shipment != null; }
+        }
+    }
+}
+
+OrderProcessor.cs
+------------------
+using System;
+
+namespace Testability
+{
+    public class OrderProcessor
+    {
+        private readonly IShippingCalculator shippingCalculator;
+
+        public OrderProcessor(IShippingCalculator shippingCalculator)
+        {
+            this.shippingCalculator = shippingCalculator;
+        }
+        public void Process(Order order)
+        {
+            if (order.isShipped)
+                throw new InvalidOperationException("The order is already processed");
+            order.Shipment = new Shipment
+            {
+                Cost = this.shippingCalculator.CalculateShipping(order),
+                ShippingDate = DateTime.Today.AddDays(1)
+            };
+
+        }
+    }
+}
+
+Shipment.cs
+------------
+using System;
+
+namespace Testability
+{
+    public class Shipment
+    {
+        
+        
+        public float Cost { get; internal set; }
+        public DateTime ShippingDate { get; internal set; }
+    }
+}
+
+ShipmentCalculator.cs
+----------------------
+namespace Testability
+{
+    public interface IShippingCalculator
+    {
+        float CalculateShipping(Order order);
+    }
+    public class ShippingCalculator : IShippingCalculator
+    {
+        public float CalculateShipping(Order order)
+        {
+            if (order.TotalPrice < 30f)
+                return order.TotalPrice * 0.1f;
+            return 0;
+        }
+    }
+}
+
+
+OrderProcessorTests.cs
+-----------------------
+using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Testability.UnitTests
+{
+    [TestClass]
+    public class OrderProcessorTests
+    {
+        //METHODNAME_CONDITION_EXPECTATION
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Process_OrderIsAlreadyShipped_ThrowsAnException()
+        {
+            var orderProcessor = new OrderProcessor(new FakeShippingCalculator());
+            var order = new Order()
+            {
+                Shipment = new Shipment()
+            };
+            orderProcessor.Process(order);
+        }
+        [TestMethod]
+        public void Process_OrderIsNotShipped_ShouldSetTheShipmentPropertyOfTheOrder()
+        {
+            var orderProcessor = new OrderProcessor(new FakeShippingCalculator());
+            var order = new Order();
+            orderProcessor.Process(order);
+
+            Assert.IsTrue(order.isShipped);
+            Assert.AreEqual(1, order.Shipment.Cost);
+            Assert.AreEqual(DateTime.Today.AddDays(1), order.Shipment.ShippingDate);
+        }
+    }
+    public class FakeShippingCalculator : IShippingCalculator
+    {
+        public float CalculateShipping(Order order)
+        {
+            return 1;
+        }
+    }
+}
