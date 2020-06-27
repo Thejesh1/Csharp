@@ -1,0 +1,49 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace StackProgram
+{
+    public class Stack
+    {
+        private readonly List<Object> list = new List<object>();       
+       
+        public void Push(object obj)
+        {
+            if (obj == null)
+                throw new InvalidOperationException("You cannot add a null object to stack");
+
+            list.Add(obj);
+        }
+        public object Pop()
+        {
+            if(list.Count==0)
+                throw new InvalidOperationException("There are no elements in the stack yet");
+
+            var index = list.Count - 1;
+            var top = list[index];
+            list.RemoveAt(index);
+            return top;
+        }
+        public void Clear()
+        {
+            list.Clear();   
+        }
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var stack = new Stack();
+            for (int i = 0; i <= 5; i++)
+                stack.Push(i);
+            //stack.Clear();
+            for (int i = 0; i <= 5; i++)
+                Console.WriteLine(stack.Pop());
+          
+        }
+    }
+}

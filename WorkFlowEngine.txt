@@ -1,0 +1,110 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace WorkFlowEngine
+{
+    public interface ITask
+    {
+        void Execute();
+    }
+    public interface IWorkflow
+    {
+        void Add(ITask task);
+        void Remove(ITask task);
+        IEnumerable<ITask> GetTasks();
+    }
+    public class Workflow : IWorkflow
+    {
+        private readonly List<ITask> tasks;
+        public Workflow()
+        {
+            tasks = new List<ITask>();
+        }
+
+        public void Add(ITask task)
+        {
+            tasks.Add(task);
+        }
+
+        public void Remove(ITask task)
+        {
+            tasks.Remove(task);
+        }
+
+        public IEnumerable<ITask> GetTasks()
+        {
+            return tasks;
+        }
+    }
+    public class WorkflowEngine
+    {
+        public void Run(IWorkflow workflow)
+        {
+            foreach(var I in workflow.GetTasks())
+            {
+                try
+                {
+                    I.Execute();
+                }
+                catch (Exception)
+                {
+                    //logging
+                    //Terminate and Persist the state of workflow
+                }
+            }
+        }
+    }
+
+    class VideoUploader : ITask
+    {
+        public void Execute()
+        {
+            Console.WriteLine("Uploading a video ...");
+        }
+    }
+
+    class CallWebService : ITask
+    {
+        public void Execute()
+        {
+            Console.WriteLine("Calling Webservice ...");
+
+        }
+    }
+
+    class SendEmail : ITask
+    {
+        public void Execute()
+        {
+            Console.WriteLine("Sending an email ...");
+
+        }
+    }
+
+    class ChangeStatus : ITask
+    {
+        public void Execute()
+        {
+            Console.WriteLine("Status changed ...");
+
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var workflow = new Workflow();
+            workflow.Add(new VideoUploader());
+            workflow.Add(new CallWebService());
+            workflow.Add(new SendEmail());
+            workflow.Add(new ChangeStatus());
+
+            var engine = new WorkflowEngine();
+            engine.Run(workflow);
+        }
+    }
+}
